@@ -6,12 +6,10 @@ import psutil
 
 from time import sleep
 from typing import List, Optional
-from dotenv import load_dotenv
 
-load_dotenv()
 
 # Common
-VERSION = os.getenv('VERSION')
+VERSION = '0.1.0'
 OS_INFO = {
     'name': os.name,  # 'posix'
     'system': platform.system(),  # 'Linux'
@@ -22,6 +20,18 @@ OS_INFO = {
 }
 
 app = typer.Typer()
+
+
+def no_support():
+    if OS_INFO.get('system') == 'Windows':
+        typer.echo(typer.style("This feature is not yet supported for windows", fg=typer.colors.GREEN, bold=True))
+        raise typer.Exit()
+
+
+def path_nvm():
+    os.system('export NVM_DIR="$HOME/.nvm"')
+    os.system('[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"')
+    os.system('[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"')
 
 
 def version_callback(value: bool):
@@ -44,7 +54,7 @@ def health():
     System health check
     """
     print('                       ')
-    print('CPU Information summary')
+    typer.echo(typer.style("CPU Information summary", fg=typer.colors.BRIGHT_BLACK, bg=typer.colors.BLUE, bold=True, ))
     print('                       ')
 
     # gives a single float value
@@ -55,7 +65,7 @@ def health():
     print('Total CPUs utilized percentage :', vcpu, '%')
 
     print('                       ')
-    print('RAM Information summary')
+    typer.echo(typer.style("RAM Information summary", fg=typer.colors.BRIGHT_BLACK, bg=typer.colors.BLUE, bold=True, ))
     print('                       ')
     # you can convert that object to a dictionary
     # print(dict(psutil.virtual_memory()._asdict()))
@@ -70,38 +80,42 @@ def health():
 
     forloop()
     print('                       ')
-    print('RAM Utilization summary')
+    typer.echo(typer.style("RAM Utilization summary", fg=typer.colors.BRIGHT_BLACK, bg=typer.colors.BLUE, bold=True, ))
     print('                       ')
     # you can have the percentage of used RAM
     print('Percentage of used RAM :', psutil.virtual_memory().percent, '%')
-    # 79.2
     # you can calculate percentage of available memory
     print('Percentage of available RAM :', psutil.virtual_memory().available * 100 / psutil.virtual_memory().total, '%')
-    # 20.8
 
 
 @app.command()
 def nvm(node: int = None):
     """
-    Install Nvm and node version
+    Install Nvm (Node version Manager)
     """
+    no_support()
+    print('                       ')
+    print('Install Nvm')
+    print('                       ')
     try:
         os.system('sudo apt update && sudo apt install curl -y')
         os.system('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash')
-        os.system('export NVM_DIR="$HOME/.nvm"')
-        os.system('[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"')
-        os.system('[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"')
-        typer.echo('Done Install Nvm')
+        path_nvm()
+        typer.echo(typer.style("Done Install Nvm", fg=typer.colors.BRIGHT_BLACK, bg=typer.colors.GREEN, bold=True,))
 
     except:
         typer.echo("Can't Install Nvm")
 
-    if node:
-        try:
-            typer.echo(f"Install Nvm and node version {node}")
-            os.system(f"nvm i {node}")
-        except:
-            typer.echo(f"Can't Install Nvm version {node}")
+
+@app.command()
+def info():
+    """
+    View system information
+    """
+    print('                       ')
+    typer.echo(typer.style("System information", fg=typer.colors.BRIGHT_BLACK, bg=typer.colors.BLUE, bold=True, ))
+    print('                       ')
+    typer.echo(OS_INFO)
 
 
 @app.callback()
