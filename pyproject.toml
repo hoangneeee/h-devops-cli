@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "h-devops"
-version = "0.1.0"
+version = "0.3.0"
 description = ""
 authors = ["Vo Viet Hoang <levuthanhtung11@gmail.com>"]
 readme = "README.md"
@@ -9,7 +9,7 @@ readme = "README.md"
 h-devops = "h_devops.main:app"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.6"
 typer = {extras = ["all"], version = "^0.4.1"}
 psutil = "^5.9.1"
 
