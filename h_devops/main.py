@@ -233,11 +233,11 @@ def service(status: str = typer.Option(None, "-ss", help="Check the status of th
     if (status):
         subprocess.run(["systemctl", "status", status])
     elif (start):
-        subprocess.run(["systemctl", "status", start])
+        subprocess.run(["systemctl", "start", start])
     elif (stop):
-        subprocess.run(["systemctl", "status", stop])
+        subprocess.run(["systemctl", "stop", stop])
     elif (restart):
-        subprocess.run(["systemctl", "status", restart])
+        subprocess.run(["systemctl", "restart", restart])
     else:
         try:
             subprocess.run(["service", "--status-all"])
@@ -272,7 +272,7 @@ def docker():
         title('Install Docker AMD64')
         try:
             os.system("sudo apt update")
-            os.system("sudo apt install apt-transport-https ca-certificates curl software-properties-common")
+            os.system("sudo apt install -y apt-transport-https ca-certificates curl software-properties-common")
             os.system("curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -")
             os.system(
                 'sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"')
@@ -282,6 +282,9 @@ def docker():
             os.system(
                 'sudo curl -L "https://github.com/docker/compose/releases/download/1.27.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose')
             os.system('sudo chmod +x /usr/local/bin/docker-compose')
+            os.system('sudo addgroup --system docker')
+            os.system('sudo adduser $USER docker')
+            os.system('newgrp docker')
 
             headers = [style("ID", 'header'), style("Name", 'header'), style("Value", 'header')]
             table = [[0, "Docker", "Successful Installation"], [1, "Docker-compose", "Successful Installation"]]
