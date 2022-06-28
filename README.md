@@ -1,4 +1,4 @@
-# h_devops v0.3.1
+# h_devops v0.3.2
 
 _Python support package from 3.6 and up_
 

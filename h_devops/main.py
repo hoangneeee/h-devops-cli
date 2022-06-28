@@ -3,13 +3,16 @@ import typer
 import subprocess
 import platform
 import psutil
+import json
 
 from time import sleep
 from tabulate import tabulate
 from typing import List, Optional
+from h_devops import __version__
+
 
 # Common
-VERSION = '0.3.1'
+VERSION = __version__
 OS_INFO = {
     'name': os.name,  # 'posix'
     'system': platform.system(),  # 'Linux'
@@ -202,8 +205,14 @@ def get_ip():
     print('Get Public IP')
     print('                       ')
     try:
-        # TODO: Kiểm tra curl đã có hay chưa nếu chưa có tiến hành cài đặt
-        os.system('curl -4 icanhazip.com')
+        # Kiểm tra xem đã có curl hay chưa và nếu chưa có tiến hành cài đặt
+        res = subprocess.run(["curl", "-V"]).__dict__
+
+        if (res.get('returncode') == 0):
+            subprocess.run(["curl", "-4", "icanhazip.com"])
+        else:
+            os.system("sudo apt install curl")
+            subprocess.run(["curl", "-4", "icanhazip.com"])
     except:
         typer.echo("Can't get public ip")
         typer.echo(typer.style("Maybe you don't have curl installed", fg=typer.colors.YELLOW, bold=True))
@@ -221,15 +230,14 @@ def service(status: str = typer.Option(None, "-ss", help="Check the status of th
     Manipulate services on the system
     """
     no_support()
-    #TODO: Thực hiện cmd ứng với các trạng thái của dịch vụ
     if (status):
-        typer.echo(status)
+        subprocess.run(["systemctl", "status", status])
     elif (start):
-        typer.echo(start)
+        subprocess.run(["systemctl", "status", start])
     elif (stop):
-        typer.echo(stop)
+        subprocess.run(["systemctl", "status", stop])
     elif (restart):
-        typer.echo(restart)
+        subprocess.run(["systemctl", "status", restart])
     else:
         try:
             subprocess.run(["service", "--status-all"])
@@ -248,6 +256,68 @@ def update():
     except:
         typer.echo("Can't update H-Devops package latest version")
         raise typer.Exit()
+
+
+@app.command()
+def docker():
+    """
+    Install Docker and Docker-compose
+    """
+    no_support()
+    title('Install Docker and Docker-compose')
+    #TODO: Install Docker and Docker-compose, kiểm tra OS tương ứng để cài đặt
+
+    datas = subprocess.run(["dpkg", "--print-architecture"], stdout=subprocess.PIPE).stdout.decode("utf-8").split("\n")
+    if (datas[0] == "amd64"):
+        title('Install Docker AMD64')
+        try:
+            os.system("sudo apt update")
+            os.system("sudo apt install apt-transport-https ca-certificates curl software-properties-common")
+            os.system("curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -")
+            os.system(
+                'sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"')
+            os.system("sudo apt update")
+            os.system("apt-cache policy docker-ce")
+            os.system("sudo apt install docker-ce -y")
+            os.system(
+                'sudo curl -L "https://github.com/docker/compose/releases/download/1.27.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose')
+            os.system('sudo chmod +x /usr/local/bin/docker-compose')
+
+            headers = [style("ID", 'header'), style("Name", 'header'), style("Value", 'header')]
+            table = [[0, "Docker", "Successful Installation"], [1, "Docker-compose", "Successful Installation"]]
+            typer.echo(tabulate(table, headers, tablefmt="fancy_grid"))
+        except:
+            headers = [style("ID", 'header'), style("Name", 'header'), style("Value", 'header')]
+            table = [[0, "Docker", "Install Fail"], [1, "Docker-compose", "Install Fail"]]
+            typer.echo(tabulate(table, headers, tablefmt="fancy_grid"))
+    else:
+        headers = [style("ID", 'header'), style("Name", 'header'), style("Value", 'header')]
+        table = [[0, "Docker", "Install Fail"], [1, "Docker-compose", "Install Fail"]]
+        typer.echo(tabulate(table, headers, tablefmt="fancy_grid"))
+
+
+@app.command()
+def jenkins():
+    """
+    Install Jenkins
+    """
+    no_support()
+    title('Install Jenkins')
+
+    try:
+        os.system("sudo apt install openjdk-11-jdk -y")
+        os.system("java --version")
+        os.system("wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -")
+        os.system("sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'")
+        os.system("sudo apt update")
+        os.system("sudo apt install jenkins -y")
+        os.system("sudo ufw allow 8080")
+        os.system("sudo systemctl enable jenkins")
+        os.system("sudo systemctl start jenkins")
+        os.system("sudo systemctl status jenkins")
+
+    except:
+        typer.echo(style("Can't install jenkins", "error"))
 
 
 @app.callback()
