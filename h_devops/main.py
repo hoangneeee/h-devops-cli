@@ -1,15 +1,14 @@
 import os
-import typer
-import subprocess
 import platform
+import subprocess
+from typing import Optional
+
 import psutil
-import json
-
-from time import sleep
+import typer
 from tabulate import tabulate
-from typing import List, Optional
-from h_devops import __version__
 
+from h_devops import __version__
+from h_devops.install.nvm import install_nvm
 
 # Common
 VERSION = __version__
@@ -131,15 +130,8 @@ def nvm():
     """
     no_support()
     title('Install Nvm')
-    try:
-        os.system('sudo apt update && sudo apt install curl -y')
-        os.system('curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash')
-        path_nvm()
-        typer.echo(typer.style("Done Install Nvm", fg=typer.colors.WHITE, bg=typer.colors.GREEN, bold=True, ))
-
-    except:
-        typer.echo("Can't Install Nvm")
-        raise typer.Exit(-1)
+    install_nvm()
+    typer.echo(typer.style("Done Install Nvm", fg=typer.colors.WHITE, bg=typer.colors.GREEN, bold=True, ))
 
 
 @app.command()
@@ -163,8 +155,9 @@ def common_service():
     typer.echo(typer.style("Oh it's really necessary for you", fg=typer.colors.GREEN, bold=True))
     print('                       ')
     try:
-        os.system('sudo apt update && sudo apt install -y wget curl nano git apt-transport-https vim software-properties-common neofetch screenfetch htop net-tools zip unzip tree')
-        #TODO: Kiểm tra xem các dịch vụ đã cài thành công hay chưa và đổi trạng thái trong bảng
+        os.system(
+            'sudo apt update && sudo apt install -y wget curl nano git apt-transport-https vim software-properties-common neofetch screenfetch htop net-tools zip unzip tree')
+        # TODO: Kiểm tra xem các dịch vụ đã cài thành công hay chưa và đổi trạng thái trong bảng
         headers = [style("Service", 'header'), style("Status", 'header')]
         table = [["wget", style("Installed", 'green')], ["curl", style("Installed", 'green')],
                  ["nano", style("Installed", 'green')], ["git", style("Installed", 'green')],
@@ -222,30 +215,6 @@ def get_ip():
 
 
 @app.command()
-def service(status: str = typer.Option(None, "-ss", help="Check the status of the service. < all | service name >", metavar="status"),
-        start: str = typer.Option(None, "-st", help="Start the <service name> service", metavar="start"),
-        stop: str = typer.Option(None, "-s", help="Stop the <service name> service", metavar="stop"),
-        restart: str = typer.Option(None, "-r", help="Restart the <service name> service", metavar="restart")):
-    """
-    Manipulate services on the system
-    """
-    no_support()
-    if (status):
-        subprocess.run(["systemctl", "status", status])
-    elif (start):
-        subprocess.run(["systemctl", "start", start])
-    elif (stop):
-        subprocess.run(["systemctl", "stop", stop])
-    elif (restart):
-        subprocess.run(["systemctl", "restart", restart])
-    else:
-        try:
-            subprocess.run(["service", "--status-all"])
-        except:
-            typer.echo(style("Can't check status all service", "error"))
-
-
-@app.command()
 def update():
     """
     Update your H-devops package to the latest version
@@ -265,7 +234,7 @@ def docker():
     """
     no_support()
     title('Install Docker and Docker-compose')
-    #TODO: Install Docker and Docker-compose, kiểm tra OS tương ứng để cài đặt
+    # TODO: Install Docker and Docker-compose, kiểm tra OS tương ứng để cài đặt
 
     datas = subprocess.run(["dpkg", "--print-architecture"], stdout=subprocess.PIPE).stdout.decode("utf-8").split("\n")
     if (datas[0] == "amd64"):
@@ -311,7 +280,8 @@ def jenkins():
         os.system("sudo apt install openjdk-11-jdk -y")
         os.system("java --version")
         os.system("wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -")
-        os.system("sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'")
+        os.system(
+            "sudo sh -c 'echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list'")
         os.system("sudo apt update")
         os.system("sudo apt install jenkins -y")
         os.system("sudo ufw allow 8080")
@@ -331,7 +301,7 @@ def main(v: Optional[bool] = typer.Option(
     Thank you very much for downloading my packages. Welcome to the world !
     Author: Võ Hoàng
     """
-    typer.echo("----------- H_devops -----------")
+    typer.echo("----------- H_Devops_CLI -----------")
 
 
 if __name__ == "__main__":
