@@ -8,6 +8,7 @@ import typer
 from tabulate import tabulate
 
 from h_devops import __version__
+from h_devops.install.docker import install_docker
 from h_devops.install.nvm import install_nvm
 
 # Common
@@ -41,12 +42,6 @@ def style(message: str, type: str):
         return typer.style(f"{message}", fg=typer.colors.BLUE, bold=True)
     if (type == 'error'):
         return typer.style(f"{message}", fg=typer.colors.RED, bold=True)
-
-
-def path_nvm():
-    os.system('export NVM_DIR="$HOME/.nvm"')
-    os.system('[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"')
-    os.system('[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"')
 
 
 def version_callback(value: bool):
@@ -266,6 +261,14 @@ def docker():
         headers = [style("ID", 'header'), style("Name", 'header'), style("Value", 'header')]
         table = [[0, "Docker", "Install Fail"], [1, "Docker-compose", "Install Fail"]]
         typer.echo(tabulate(table, headers, tablefmt="fancy_grid"))
+
+
+@app.command()
+def dockerv2(platform: str = typer.Argument(..., help='["windows", "mac", "linux"]')):
+    """
+    Install Docker and Docker-compose new
+    """
+    install_docker(platform)
 
 
 @app.command()
