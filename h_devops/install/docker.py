@@ -20,7 +20,8 @@ def install_docker_compose():
     Install Docker Compose.
     """
     try:
-        subprocess.run(["curl", "-L", "-o", "/usr/local/bin/docker-compose", "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)"])
+        subprocess.run(["curl", "-L", "-o", "/usr/local/bin/docker-compose",
+                       "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)"])
         subprocess.run(["chmod", "+x", "/usr/local/bin/docker-compose"])
         typer.echo("Docker Compose installed successfully!")
     except subprocess.CalledProcessError as e:
